@@ -1,98 +1,92 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Collaborative Todo-List App
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
-
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
-
-## Features
-
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+A collaborative to-do list application built with Next.js, Tailwind CSS, and Supabase. This app allows users to create, edit, and share tasks with others in real time. Powered by Zustand for global state management and TanStack Query for efficient data fetching, this app is designed to be fast, responsive, and easy to use.
 
 ## Demo
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+Check out the live demo here: [Collaborative Todo-List App Demo](https://todo-list-app-pi-pink.vercel.app/)
 
-## Deploy to Vercel
+## Features
 
-Vercel deployment will guide you through creating a Supabase account and project.
+- Real-time task updates with Supabase
+- Collaborative task sharing
+- Simple and clean UI with Tailwind CSS
+- Optimized data fetching and caching with TanStack Query
+- Easy state management using Zustand
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## Tech Stack
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+- **Supabase** – For backend database and real-time updates
+- **Next.js** – Framework for server-rendered React applications
+- **Tailwind CSS** – For styling the app
+- **Zustand** – For global state management
+- **TanStack Query** – For fetching, caching, and syncing server state
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+## Getting Started
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+Follow these steps to set up the Collaborative Todo-List App on your local machine.
 
-## Clone and run locally
+### Prerequisites
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+- [Node.js](https://nodejs.org/) (v14 or higher)
+- [Supabase account](https://supabase.io/) and a new project created
+- Environment variables for Supabase setup
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### Installation
 
-   ```bash
-   npx create-next-app -e with-supabase
-   ```
-
-3. Use `cd` to change into the app's directory
-
-   ```bash
-   cd name-of-new-app
-   ```
-
-4. Rename `.env.example` to `.env.local` and update the following:
-
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
-
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-
-5. You can now run the Next.js local development server:
+1. **Clone the repository:**
 
    ```bash
-   npm run dev
-   ```
+   git clone https://github.com/Zeyad-Sayed-70/Todo-List-App.git
+   cd todo-list-app
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+2. **Install dependencies:**
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+   ```bash
+   npm install
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+3. **Set up environment variables:**
+Create a .env.local file in the root of your project with the following variables:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 
-## Feedback and issues
+  Replace <your-supabase-url> and <your-supabase-anon-key> with the values from your Supabase project.
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
 
-## More Supabase examples
+4. **Set up Supabase:**
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+- Log into your Supabase dashboard.
+- Create a new table for tasks and set up the necessary fields (id, task, completed, etc.).
+- Enable real-time updates on the table.
 
-# Todo-List-App
+### Running the App Locally
+1. **Start the development server:**
+
+    ```bash
+    npm run dev
+
+2. **Open the app:**
+
+  Navigate to http://localhost:3000 in your browser.
+
+### Scripts
+- <code>npm run dev</code> – Starts the development server.
+- <code>npm run build</code> – Builds the app for production.
+- <code>npm start</code> – Runs the app in production mode.
+  
+### Usage
+1. Sign up or log in to the app using your Supabase account.
+2. Create a new task by entering a task and clicking "Add"
+3. Add connections to your room by selecting a user and clicking "Add"
+4. Watch as updates happen in real-time as collaborators add or modify tasks with your connections.
+
+
+### Acknowledgments
+Thanks to the open-source projects that made this app possible:
+
+- [Supabase](https://supabase.com/)
+- [Next.js](https://nextjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Zustand](https://www.npmjs.com/package/zustand)
+- [TanStack Query](https://tanstack.com/)
