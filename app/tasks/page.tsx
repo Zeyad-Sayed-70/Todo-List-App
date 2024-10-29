@@ -1,4 +1,5 @@
 "use client";
+import React, { useCallback, useEffect, useMemo } from "react";
 import Connections from "@/components/todos/connections";
 import EnterTask from "@/components/todos/enterTask";
 import TodosList from "@/components/todos/todosList";
@@ -10,9 +11,6 @@ import { useRoomId } from "@/utils/zustandHooks/roomId";
 import { useTodos } from "@/utils/zustandHooks/todos";
 import { useUserSession } from "@/utils/zustandHooks/userSession";
 import { useSearchParams } from "next/navigation";
-import React from "react";
-
-const supabase = createClient();
 
 const Page = () => {
   const initUserSession = useUserSession((state) => state.initUserSession);
@@ -23,31 +21,40 @@ const Page = () => {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("roomId");
 
-  React.useEffect(() => {
+  // Memoize supabase client to avoid recreating on every render
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
     initUserSession();
     initConnections();
     initConnected();
-  }, []);
+  }, [initUserSession, initConnections, initConnected]);
 
-  React.useEffect(() => {
+  // Memoize the payload handler to avoid recreating on each render
+  const handleTodosPayload = useCallback(
+    (payload: any) => {
+      switch (payload.eventType) {
+        case "INSERT":
+          insetTodoData(payload.new as Todo);
+          break;
+        case "UPDATE":
+          updateTodosData(payload.new.id, payload.new as Todo);
+          break;
+        case "DELETE":
+          deleteTodoData(payload.old.id);
+          break;
+      }
+    },
+    [insetTodoData, updateTodosData, deleteTodoData]
+  );
+
+  useEffect(() => {
     const channel = supabase
       .channel("todos")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "todos" },
-        (payload) => {
-          switch (payload.eventType) {
-            case "INSERT":
-              insetTodoData(payload.new as Todo);
-              break;
-            case "UPDATE":
-              updateTodosData(payload.new.id, payload.new as Todo);
-              break;
-            case "DELETE":
-              deleteTodoData(payload.old.id);
-              break;
-          }
-        }
+        handleTodosPayload
       )
       .subscribe();
 
@@ -55,24 +62,25 @@ const Page = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, handleTodosPayload]);
 
-  React.useEffect(() => {
+  // Memoize the payload handler for connections
+  const handleConnectionsPayload = useCallback(
+    (payload: any) => {
+      if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+        updateConnectionsData(payload.new.connectors);
+      }
+    },
+    [updateConnectionsData]
+  );
+
+  useEffect(() => {
     const channel = supabase
       .channel("connections")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "connections" },
-        (payload) => {
-          switch (payload.eventType) {
-            case "INSERT":
-              updateConnectionsData(payload.new.connectors);
-              break;
-            case "UPDATE":
-              updateConnectionsData(payload.new.connectors);
-              break;
-          }
-        }
+        handleConnectionsPayload
       )
       .subscribe();
 
@@ -80,15 +88,15 @@ const Page = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, handleConnectionsPayload]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (roomId) {
       setRoomId(roomId);
     } else {
       setLoading(false);
     }
-  }, [roomId]);
+  }, [roomId, setRoomId, setLoading]);
 
   if (isLoading) return <Loading />;
 
@@ -101,4 +109,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default React.memo(Page);

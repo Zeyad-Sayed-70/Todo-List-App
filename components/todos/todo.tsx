@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState, useCallback } from "react";
 import { Checkbox } from "../ui/checkbox";
 import { Todo } from "@/types";
 import { Button } from "../ui/button";
@@ -9,20 +9,21 @@ import { Input } from "../ui/input";
 import { useUserSession } from "@/utils/zustandHooks/userSession";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 
-const TodoItem = ({ todo }: { todo: Todo }) => {
-  const [isEditible, setIsEditible] = useState<boolean>(false);
-  const [newTask, setNewTask] = useState<string>(todo.task);
+interface TodoItemProps {
+  todo: Todo;
+}
+
+const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
+  const [isEditable, setIsEditable] = useState(false);
+  const [newTask, setNewTask] = useState(todo.task);
   const session = useUserSession((state) => state.session);
 
   const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      updates,
-    }: {
+    mutationFn: async (data: {
       id: number;
       updates: Partial<Omit<Todo, "id" | "created_at">>;
     }) => {
-      return updateTodo(id, updates);
+      return updateTodo(data.id, data.updates);
     },
   });
 
@@ -32,76 +33,70 @@ const TodoItem = ({ todo }: { todo: Todo }) => {
     },
   });
 
-  const handleCheckboxChange = async (e: boolean) => {
-    const updates = {
-      completed: e,
-    };
+  const handleCheckboxChange = useCallback(
+    async (checked: boolean) => {
+      const updates = { completed: checked };
+      await updateMutation.mutateAsync({ id: todo.id, updates });
+    },
+    [todo.id, updateMutation]
+  );
 
+  const handleTaskUpdate = useCallback(async () => {
+    const updates = { task: newTask };
     await updateMutation.mutateAsync({ id: todo.id, updates });
-  };
+    setIsEditable(false);
+  }, [newTask, todo.id, updateMutation]);
 
-  const handleTaskUpdate = async () => {
-    const updates = {
-      task: newTask,
-    };
-
-    await updateMutation.mutateAsync({ id: todo.id, updates });
-    setIsEditible(false);
-  };
-
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     await deleteMutation.mutateAsync(todo.id);
-  };
+  }, [todo.id, deleteMutation]);
+
+  const toggleEdit = () => setIsEditable((prev) => !prev);
 
   return (
-    <>
-      <div
-        key={todo.id}
-        className="flex items-center gap-2 bg-gray-100 dark:bg-gray-900 p-4 px-6 rounded-md"
-      >
-        <Checkbox
-          checked={todo.completed}
-          onCheckedChange={handleCheckboxChange}
-        />
-        {!isEditible ? (
-          <p
-            className={`text-sm w-full ${todo.completed ? "line-through" : ""}`}
-          >
-            {newTask}
-          </p>
-        ) : (
-          <Input value={newTask} onChange={(e) => setNewTask(e.target.value)} />
-        )}
+    <div
+      key={todo.id}
+      className="flex items-center gap-2 bg-gray-100 dark:bg-gray-900 p-4 px-6 rounded-md"
+    >
+      <Checkbox
+        checked={todo.completed}
+        onCheckedChange={handleCheckboxChange}
+      />
+      {isEditable ? (
+        <Input value={newTask} onChange={(e) => setNewTask(e.target.value)} />
+      ) : (
+        <p className={`text-sm w-full ${todo.completed ? "line-through" : ""}`}>
+          {newTask}
+        </p>
+      )}
 
-        {session?.id === todo.created_by && (
-          <Avatar
-            title={session.email}
-            className="w-8 h-8 text-sm cursor-default"
-          >
-            <AvatarFallback>{session.email?.[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
-        )}
-        <Button
-          className="min-w-8 min-h-8"
-          variant={"outline"}
-          size={"icon"}
-          onClick={() =>
-            isEditible ? handleTaskUpdate() : setIsEditible(true)
-          }
+      {session?.id === todo.created_by && (
+        <Avatar
+          title={session.email}
+          className="w-8 h-8 text-sm cursor-default"
         >
-          {isEditible ? <CheckIcon size={16} /> : <Pen size={16} />}
-        </Button>
-        <Button
-          className="min-w-8 min-h-8"
-          variant={"destructive"}
-          size={"icon"}
-          onClick={handleDelete}
-        >
-          <Trash size={16} />
-        </Button>
-      </div>
-    </>
+          <AvatarFallback>{session.email?.[0].toUpperCase()}</AvatarFallback>
+        </Avatar>
+      )}
+
+      <Button
+        className="min-w-8 min-h-8"
+        variant="outline"
+        size="icon"
+        onClick={isEditable ? handleTaskUpdate : toggleEdit}
+      >
+        {isEditable ? <CheckIcon size={16} /> : <Pen size={16} />}
+      </Button>
+      <Button
+        className="min-w-8 min-h-8"
+        variant="destructive"
+        size="icon"
+        onClick={handleDelete}
+      >
+        <Trash size={16} />
+      </Button>
+    </div>
   );
 };
 
-export default TodoItem;
+export default memo(TodoItem);

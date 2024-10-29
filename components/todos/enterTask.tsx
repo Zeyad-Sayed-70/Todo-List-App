@@ -14,33 +14,48 @@ import {
 import { FormMessage } from "../form-message";
 import { useRoomId } from "@/utils/zustandHooks/roomId";
 
-const EnterTask = () => {
-  const [task, setTask] = useState("");
-  const [assignedTo, setAssignedTo] = useState<string[]>([]); // Assuming you want to assign tasks to users
+// Define the types for the todo item being added
+type TodoData = {
+  task: string;
+  assigned_to: string[];
+  created_by: string;
+  owner_id: string;
+};
+
+const EnterTask: React.FC = () => {
+  const [task, setTask] = useState<string>("");
+  const [assignedTo, setAssignedTo] = useState<string[]>([]);
   const session = useUserSession((state) => state.session);
   const roomId = useRoomId((state) => state.roomId);
 
   // Define the mutation for adding a todo
-  const addTodoMutation = useMutation({ mutationFn: addTodo });
+  const addTodoMutation = useMutation({
+    mutationFn: addTodo,
+    onSuccess: () => {
+      setTask(""); // Clear task input on success
+      setAssignedTo([]); // Clear assignments
+    },
+    onError: (error) => {
+      console.error("Error adding task:", error);
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (task.trim() === "" || !session?.id) return; // Prevent empty submissions
+    if (!task.trim() || !session?.id) return; // Prevent empty submissions
 
-    // Add the todo
-    addTodoMutation.mutate({
+    const todoData: TodoData = {
       task,
       assigned_to: assignedTo,
       created_by: session.id,
-      owner_id: roomId ? roomId : session.id, // If there is a room ID, use it, otherwise use the session ID
-    });
+      owner_id: roomId ?? session.id,
+    };
 
-    // Reset the form
-    setTask("");
+    addTodoMutation.mutate(todoData);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <div className="flex gap-2">
         <Input
           type="text"
@@ -49,12 +64,14 @@ const EnterTask = () => {
           onChange={(e) => setTask(e.target.value)}
           className="h-10"
         />
-        {/* <Select>
+        {/* Uncomment and extend this section to allow assignment selection */}
+        {/* <Select onValueChange={(value) => setAssignedTo([value])}>
           <SelectTrigger className="w-[180px] h-10">
             <SelectValue placeholder="Assign To" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="None">None</SelectItem>
+            <SelectItem value="User1">User1</SelectItem>
+            <SelectItem value="User2">User2</SelectItem>
           </SelectContent>
         </Select> */}
         <Button

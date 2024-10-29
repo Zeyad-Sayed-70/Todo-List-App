@@ -1,6 +1,6 @@
 import { getTodos } from "@/utils/features/todos";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useMemo } from "react";
 import TodoItem from "./todo";
 import Loading from "../ui/loading";
 import { FormMessage } from "../form-message";
@@ -28,13 +28,20 @@ const TodosList = () => {
     refetch();
   }, [roomId, roomIsLoading]);
 
+  // Use useMemo to create the list of TodoItem components
+  const todosList = useMemo(
+    () =>
+      todosData && todosData.length > 0
+        ? todosData.map((todo) => <TodoItem key={todo.id} todo={todo} />)
+        : [],
+    [todosData]
+  );
+
   if (isLoading || roomIsLoading) return <Loading />;
   if (error) return <FormMessage message={error} />;
 
   return (
-    <section className="pt-4 pb-6 flex flex-col gap-2">
-      {todosData?.map((todo) => <TodoItem key={todo.id} todo={todo} />)}
-    </section>
+    <section className="pt-4 pb-6 flex flex-col gap-2">{todosList}</section>
   );
 };
 

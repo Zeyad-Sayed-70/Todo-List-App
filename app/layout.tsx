@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
 import TanQueryProvider from "./TanQueryProvider";
+import { Suspense } from "react";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -45,7 +46,7 @@ export default function RootLayout({
                   </div>
                 </nav>
                 <div className="flex flex-col gap-20 max-w-5xl w-full sm:w-fit p-5">
-                  {children}
+                  <Suspense>{children}</Suspense>
                 </div>
 
                 <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
