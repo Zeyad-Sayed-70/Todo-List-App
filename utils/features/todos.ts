@@ -13,6 +13,7 @@ export async function getTodos({ id }: { id?: string }): Promise<Todo[]> {
     .from("todos")
     .select("*")
     .filter("owner_id", "eq", uid)
+    .filter("deleted", "eq", false)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -67,13 +68,4 @@ export async function updateTodo(
   }
 
   return data;
-}
-
-// Function to delete a todo by ID
-export async function deleteTodo(id: number): Promise<void> {
-  const { error } = await supabase.from("todos").delete().eq("id", id);
-
-  if (error) {
-    throw new Error(`Error deleting todo: ${error.message}`);
-  }
 }

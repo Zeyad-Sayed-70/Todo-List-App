@@ -8,6 +8,7 @@ export type Todo = {
   created_by: string;
   created_at: Date;
   owner_id: string;
+  deleted: boolean;
 };
 
 export type Connector = {

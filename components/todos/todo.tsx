@@ -4,7 +4,7 @@ import { Todo } from "@/types";
 import { Button } from "../ui/button";
 import { CheckIcon, Pen, Trash } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { deleteTodo, updateTodo } from "@/utils/features/todos";
+import { updateTodo } from "@/utils/features/todos";
 import { Input } from "../ui/input";
 import { useUserSession } from "@/utils/zustandHooks/userSession";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -27,12 +27,6 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return deleteTodo(id);
-    },
-  });
-
   const handleCheckboxChange = useCallback(
     async (checked: boolean) => {
       const updates = { completed: checked };
@@ -48,15 +42,20 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   }, [newTask, todo.id, updateMutation]);
 
   const handleDelete = useCallback(async () => {
-    await deleteMutation.mutateAsync(todo.id);
-  }, [todo.id, deleteMutation]);
+    await updateMutation.mutateAsync({
+      id: todo.id,
+      updates: { deleted: true },
+    });
+  }, [todo.id, updateMutation]);
 
   const toggleEdit = () => setIsEditable((prev) => !prev);
+
+  if (todo.deleted) return null;
 
   return (
     <div
       key={todo.id}
-      className="flex items-center gap-2 bg-gray-100 dark:bg-gray-900 p-4 px-6 rounded-md"
+      className={`flex items-center gap-2 bg-gray-100 dark:bg-gray-900 p-4 px-6 rounded-md ${updateMutation.isPending ? "!cursor-wait" : "cursor-auto"}`}
     >
       <Checkbox
         checked={todo.completed}

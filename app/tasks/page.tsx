@@ -33,7 +33,6 @@ const Page = () => {
   // Memoize the payload handler to avoid recreating on each render
   const handleTodosPayload = useCallback(
     (payload: any) => {
-      console.log(payload);
       switch (payload.eventType) {
         case "INSERT":
           insetTodoData(payload.new as Todo);
@@ -51,39 +50,28 @@ const Page = () => {
 
   useEffect(() => {
     const channel = supabase.channel("todos");
-    if (roomId) {
-      channel
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "todos",
-            filter: `owner_id=eq.${roomId}`,
-          },
-          handleTodosPayload
-        )
-        .subscribe();
-    } else {
-      channel
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "todos",
-            filter: `owner_id=eq.${session?.id}`,
-          },
-          handleTodosPayload
-        )
-        .subscribe();
-    }
+
+    // Subscribe to changes in the "todos" table
+    channel
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "todos",
+          filter: roomId
+            ? `owner_id=eq.${roomId}`
+            : `owner_id=eq.${session?.id}`,
+        },
+        handleTodosPayload
+      )
+      .subscribe();
 
     // Clean up the subscription on component unmount
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, handleTodosPayload, session, roomId]);
+  }, [supabase, session, roomId]);
 
   // Memoize the payload handler for connections
   const handleConnectionsPayload = useCallback(
