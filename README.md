@@ -18,6 +18,7 @@ Check out the live demo here: [Collaborative Todo-List App Demo](https://todo-li
 
 - **Supabase** – For backend database and real-time updates
 - **Next.js** – Framework for server-rendered React applications
+- **Typescript** - To add type safety.
 - **Tailwind CSS** – For styling the app
 - **Zustand** – For global state management
 - **TanStack Query** – For fetching, caching, and syncing server state
