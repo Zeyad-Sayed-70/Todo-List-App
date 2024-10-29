@@ -77,15 +77,3 @@ export async function deleteTodo(id: number): Promise<void> {
     throw new Error(`Error deleting todo: ${error.message}`);
   }
 }
-
-export async function subscribeToTodos() {
-  const subscription = supabase
-    .channel("todos")
-    .on(
-      "postgres_changes",
-      { event: "INSERT", schema: "public", table: "todos" },
-      (payload) => {
-        console.log("New todo added:", payload.new);
-      }
-    );
-}

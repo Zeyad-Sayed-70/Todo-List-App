@@ -13,7 +13,7 @@ import { useUserSession } from "@/utils/zustandHooks/userSession";
 import { useSearchParams } from "next/navigation";
 
 const Page = () => {
-  const initUserSession = useUserSession((state) => state.initUserSession);
+  const { initUserSession, session } = useUserSession();
   const { updateTodosData, deleteTodoData, insetTodoData } = useTodos();
   const { initConnections, initConnected, updateConnectionsData } =
     useConnections();
@@ -33,6 +33,7 @@ const Page = () => {
   // Memoize the payload handler to avoid recreating on each render
   const handleTodosPayload = useCallback(
     (payload: any) => {
+      console.log(payload);
       switch (payload.eventType) {
         case "INSERT":
           insetTodoData(payload.new as Todo);
@@ -49,20 +50,40 @@ const Page = () => {
   );
 
   useEffect(() => {
-    const channel = supabase
-      .channel("todos")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "todos" },
-        handleTodosPayload
-      )
-      .subscribe();
+    const channel = supabase.channel("todos");
+    if (roomId) {
+      channel
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "todos",
+            filter: `owner_id=eq.${roomId}`,
+          },
+          handleTodosPayload
+        )
+        .subscribe();
+    } else {
+      channel
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "todos",
+            filter: `owner_id=eq.${session?.id}`,
+          },
+          handleTodosPayload
+        )
+        .subscribe();
+    }
 
     // Clean up the subscription on component unmount
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, handleTodosPayload]);
+  }, [supabase, handleTodosPayload, session, roomId]);
 
   // Memoize the payload handler for connections
   const handleConnectionsPayload = useCallback(

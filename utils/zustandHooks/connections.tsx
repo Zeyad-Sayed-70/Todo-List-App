@@ -72,7 +72,7 @@ export const useConnections = create<ConnectionsState>((set) => ({
           throw new Error(error.message);
         }
 
-        if (data) {
+        if (data && data[0]?.uid) {
           // Get users data from thier ids (connectors array)
           const { data: users, error } = await supabase
             .from("user_view")
